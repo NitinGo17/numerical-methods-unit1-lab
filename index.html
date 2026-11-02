@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Numerical Methods — Unit I Visual Lab (Roots of Equations)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b1219;
+    --bg-2:#0e1822;
+    --surface:#111c26;
+    --surface-2:#16232e;
+    --border:rgba(140,175,200,0.16);
+    --border-strong:rgba(140,175,200,0.30);
+    --text:#e8eef4;
+    --text-dim:#8fa3b4;
+    --text-faint:#61798b;
+    --gold:#d4a73a;
+    --gold-dim:rgba(212,167,58,0.14);
+    --teal:#2aa6a6;
+    --teal-dim:rgba(42,166,166,0.14);
+    --rust:#c2543f;
+    --rust-dim:rgba(194,84,63,0.14);
+    --blue:#4d8fc4;
+    --grid:rgba(120,160,190,0.07);
+    --font-body:'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-mono:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+    --shadow:0 18px 40px -24px rgba(0,0,0,0.9);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f4f1ea;
+      --bg-2:#eeeae1;
+      --surface:#fbf9f5;
+      --surface-2:#f2eee6;
+      --border:rgba(30,50,70,0.14);
+      --border-strong:rgba(30,50,70,0.28);
+      --text:#16232e;
+      --text-dim:#4e6474;
+      --text-faint:#7d8f9c;
+      --gold:#9c7412;
+      --gold-dim:rgba(156,116,18,0.12);
+      --teal:#0f7676;
+      --teal-dim:rgba(15,118,118,0.10);
+      --rust:#a83c26;
+      --rust-dim:rgba(168,60,38,0.10);
+      --blue:#2b6699;
+      --grid:rgba(30,60,90,0.08);
+      --shadow:0 18px 40px -28px rgba(20,40,60,0.35);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(900px 500px at 12% -8%, var(--gold-dim), transparent 65%),
+      radial-gradient(800px 460px at 92% 4%, var(--teal-dim), transparent 62%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+    background-attachment:fixed;
+    color:var(--text);
+    font-family:var(--font-body);
+    font-weight:400;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(circle at 50% 20%, #000 0%, transparent 78%);
+    -webkit-mask-image:radial-gradient(circle at 50% 20%, #000 0%, transparent 78%);
+  }
+  .wrap{position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:44px 22px 90px}
+  .mono{font-family:var(--font-mono)}
+
+  /* ---------- header ---------- */
+  header.hero{margin-bottom:38px; animation:fadeUp .7s ease both}
+  .kicker{
+    display:inline-flex; align-items:center; gap:9px;
+    font-family:var(--font-mono); font-size:11.5px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--gold); border:1px solid var(--border-strong); border-radius:2px;
+    padding:6px 11px; background:var(--surface);
+  }
+  .kicker .dot{width:6px;height:6px;background:var(--gold);border-radius:50%}
+  h1{
+    font-size:clamp(30px,4.6vw,50px); line-height:1.06; letter-spacing:-.025em;
+    font-weight:600; margin:20px 0 14px;
+  }
+  h1 em{font-style:normal; color:var(--gold)}
+  .lede{max-width:66ch; color:var(--text-dim); font-size:16.5px; font-weight:300}
+  .lede strong{color:var(--text); font-weight:500}
+
+  /* ---------- scope strip ---------- */
+  .scope{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:1px;
+    background:var(--border); border:1px solid var(--border); margin:30px 0 44px;
+    animation:fadeUp .7s .08s ease both;
+  }
+  .scope div{background:var(--surface); padding:14px 16px}
+  .scope .lbl{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-faint); display:block; margin-bottom:5px}
+  .scope .val{font-size:13.5px; color:var(--text)}
+  .scope .out{color:var(--rust)}
+
+  /* ---------- section chrome ---------- */
+  section{margin-bottom:52px; animation:fadeUp .7s ease both}
+  .sec-head{display:flex; align-items:baseline; gap:14px; margin-bottom:20px; border-bottom:1px solid var(--border); padding-bottom:12px}
+  .sec-num{font-family:var(--font-mono); font-size:12px; color:var(--gold); letter-spacing:.1em}
+  h2{font-size:20px; font-weight:600; margin:0; letter-spacing:-.01em}
+  .sec-sub{font-family:var(--font-mono); font-size:11px; color:var(--text-faint); letter-spacing:.1em; text-transform:uppercase; margin-left:auto}
+  p{margin:0 0 14px; max-width:72ch}
+  .dim{color:var(--text-dim)}
+
+  /* ---------- lab ---------- */
+  .lab{
+    background:var(--surface); border:1px solid var(--border-strong); border-radius:3px;
+    box-shadow:var(--shadow); overflow:hidden;
+  }
+  .lab-bar{
+    display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+    padding:12px 14px; background:var(--surface-2); border-bottom:1px solid var(--border);
+  }
+  .seg{display:inline-flex; border:1px solid var(--border-strong); border-radius:2px; overflow:hidden}
+  .seg button{
+    font-family:var(--font-mono); font-size:11.5px; letter-spacing:.06em;
+    background:transparent; color:var(--text-dim); border:0; border-right:1px solid var(--border);
+    padding:8px 13px; cursor:pointer; transition:background .16s, color .16s;
+  }
+  .seg button:last-child{border-right:0}
+  .seg button:hover{color:var(--text); background:rgba(140,175,200,0.07)}
+  .seg button[aria-pressed="true"]{background:var(--gold-dim); color:var(--gold); box-shadow:inset 0 -2px 0 var(--gold)}
+  .seg button:focus-visible{outline:2px solid var(--gold); outline-offset:-2px}
+  select, .btn{
+    font-family:var(--font-mono); font-size:12px; color:var(--text);
+    background:var(--surface); border:1px solid var(--border-strong); border-radius:2px;
+    padding:8px 11px; cursor:pointer;
+  }
+  select:focus-visible,.btn:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
+  .btn:hover{border-color:var(--gold); color:var(--gold)}
+  .btn.primary{background:var(--gold); border-color:var(--gold); color:#12100a; font-weight:600}
+  .btn.primary:hover{filter:brightness(1.1); color:#12100a}
+  .btn:disabled{opacity:.4; cursor:not-allowed; border-color:var(--border)}
+  .spacer{flex:1 1 auto}
+  .speed{display:flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:11px; color:var(--text-faint)}
+  .speed input{width:82px; accent-color:var(--gold)}
+
+  .lab-body{padding:16px 16px 18px}
+  .canvas-shell{position:relative; border:1px solid var(--border); background:var(--surface-2); border-radius:2px}
+  canvas{display:block; width:100%; height:auto; border-radius:2px}
+  .badge-method{
+    position:absolute; top:10px; left:12px; font-family:var(--font-mono); font-size:10.5px;
+    letter-spacing:.12em; text-transform:uppercase; padding:4px 8px; border-radius:2px;
+    background:var(--surface); border:1px solid var(--border-strong); color:var(--text-dim);
+  }
+
+  .narr{
+    margin-top:14px; display:grid; grid-template-columns:76px 1fr; gap:0;
+    border:1px solid var(--border); border-radius:2px; background:var(--surface-2);
+  }
+  .narr .idx{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    border-right:1px solid var(--border); padding:10px 6px; background:var(--gold-dim);
+  }
+  .narr .idx span:first-child{font-family:var(--font-mono); font-size:9.5px; letter-spacing:.12em; color:var(--text-faint); text-transform:uppercase}
+  .narr .idx span:last-child{font-family:var(--font-mono); font-size:22px; color:var(--gold); line-height:1.1}
+  .narr .txt{padding:12px 14px; font-size:13.5px; color:var(--text); min-height:58px}
+  .narr .txt b{color:var(--gold); font-weight:600}
+  .narr .txt code{font-family:var(--font-mono); font-size:12.5px; background:rgba(140,175,200,0.1); padding:1px 5px; border-radius:2px}
+
+  .formula{
+    margin-top:14px; font-family:var(--font-mono); font-size:13px; color:var(--text);
+    background:var(--surface-2); border:1px solid var(--border); border-left:2px solid var(--gold);
+    border-radius:2px; padding:12px 14px; overflow-x:auto; white-space:nowrap;
+  }
+  .formula .cap{display:block; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-faint); margin-bottom:7px; white-space:normal}
+
+  /* ---------- table ---------- */
+  .tbl-wrap{margin-top:16px; border:1px solid var(--border); border-radius:2px; overflow-x:auto; background:var(--surface-2)}
+  table{width:100%; border-collapse:collapse; font-family:var(--font-mono); font-size:12px; min-width:520px}
+  thead th{
+    position:sticky; top:0; background:var(--surface-2); text-align:right;
+    font-size:11px; letter-spacing:.04em; color:var(--text-faint);
+    font-weight:500; padding:9px 12px; border-bottom:1px solid var(--border-strong); white-space:nowrap;
+  }
+  thead th sub{font-size:9px}
+  thead th:first-child{text-align:left}
+  tbody td{padding:8px 12px; text-align:right; border-bottom:1px solid var(--border); font-variant-numeric:tabular-nums; color:var(--text-dim)}
+  tbody td:first-child{text-align:left; color:var(--text-faint)}
+  tbody tr:nth-child(even){background:rgba(140,175,200,0.035)}
+  tbody tr.cur{background:var(--gold-dim)}
+  tbody tr.cur td{color:var(--text)}
+  tbody tr:last-child td{border-bottom:0}
+  .neg{color:var(--rust)}
+  .pos{color:var(--teal)}
+
+  /* ---------- convergence ---------- */
+  .conv-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:22px; align-items:start}
+  @media (max-width:880px){.conv-grid{grid-template-columns:1fr}}
+  .legend{display:flex; flex-wrap:wrap; gap:16px; margin-top:12px; font-family:var(--font-mono); font-size:11px; color:var(--text-dim)}
+  .legend i{display:inline-block; width:18px; height:2px; vertical-align:middle; margin-right:6px; border-radius:2px}
+  .note{
+    border:1px solid var(--border); border-left:2px solid var(--rust); background:var(--surface);
+    padding:13px 15px; border-radius:2px; font-size:13.5px; color:var(--text-dim); margin-top:16px;
+  }
+  .note b{color:var(--rust); font-weight:600}
+  .note.tip{border-left-color:var(--teal)}
+  .note.tip b{color:var(--teal)}
+
+  /* ---------- method cards ---------- */
+  .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(258px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border)}
+  .card{background:var(--surface); padding:18px 18px 20px}
+  .card .tag{font-family:var(--font-mono); font-size:10px; letter-spacing:.13em; text-transform:uppercase; padding:3px 7px; border-radius:2px; display:inline-block; margin-bottom:11px}
+  .card.c1 .tag{background:var(--teal-dim); color:var(--teal)}
+  .card.c2 .tag{background:var(--rust-dim); color:var(--rust)}
+  .card.c3 .tag{background:var(--gold-dim); color:var(--gold)}
+  .card h3{font-size:15px; margin:0 0 8px; font-weight:600}
+  .card p{font-size:13px; color:var(--text-dim); margin:0 0 10px; max-width:none}
+  .card dl{margin:0; font-size:12.5px; display:grid; grid-template-columns:auto 1fr; gap:5px 10px}
+  .card dt{font-family:var(--font-mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-faint); padding-top:2px}
+  .card dd{margin:0; color:var(--text)}
+
+  /* ---------- checklist ---------- */
+  .check{list-style:none; padding:0; margin:0; display:grid; gap:1px; background:var(--border); border:1px solid var(--border)}
+  .check li{background:var(--surface); padding:12px 15px; display:grid; grid-template-columns:22px 1fr; gap:10px; font-size:13.5px; align-items:start}
+  .check .box{width:13px; height:13px; border:1px solid var(--border-strong); border-radius:1px; margin-top:4px}
+  .check small{display:block; color:var(--text-faint); font-size:12px; font-family:var(--font-mono); margin-top:3px}
+
+  footer{border-top:1px solid var(--border); padding-top:20px; font-family:var(--font-mono); font-size:11px; color:var(--text-faint); line-height:1.9}
+  footer a{color:var(--text-dim)}
+
+  @keyframes fadeUp{from{opacity:0; transform:translateY(14px)}to{opacity:1; transform:none}}
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="kicker"><span class="dot"></span>BCA-504 · Numerical Methods · Unit I</span>
+    <h1>Roots of equations, <em>seen</em> rather than memorised</h1>
+    <p class="lede">Three methods, one job: trap a point where <span class="mono">f(x) = 0</span>. Press <strong>Play</strong> and watch each algorithm hunt the root — the geometry explains the formula, not the other way round.</p>
+  </header>
+
+  <div class="scope">
+    <div><span class="lbl">In scope</span><span class="val">Units I – IV</span></div>
+    <div><span class="lbl">This page</span><span class="val">Unit I — all 4 topics</span></div>
+    <div><span class="lbl">Excluded</span><span class="val out">Gauss–Seidel (Unit IV)</span></div>
+    <div><span class="lbl">Syllabus source</span><span class="val">C.C.S. University, Meerut</span></div>
+  </div>
+
+  <!-- ================= LAB ================= -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">01</span>
+      <h2>The iteration lab</h2>
+      <span class="sec-sub">animated · step through</span>
+    </div>
+
+    <div class="lab">
+      <div class="lab-bar">
+        <div class="seg" role="group" aria-label="Method">
+          <button data-method="bisect" aria-pressed="true">Bisection</button>
+          <button data-method="false" aria-pressed="false">False Position</button>
+          <button data-method="newton" aria-pressed="false">Newton–Raphson</button>
+        </div>
+        <select id="eqSel" aria-label="Equation"></select>
+        <div class="spacer"></div>
+        <button class="btn primary" id="playBtn">Play</button>
+        <button class="btn" id="stepBtn">Step</button>
+        <button class="btn" id="resetBtn">Reset</button>
+        <button class="btn" id="allBtn">Show all</button>
+        <div class="speed"><label for="spd">speed</label><input type="range" id="spd" min="180" max="1500" value="720" step="20"></div>
+      </div>
+
+      <div class="lab-body">
+        <div class="canvas-shell">
+          <span class="badge-method" id="methodBadge">bisection</span>
+          <canvas id="plot" height="460" aria-label="Animated plot of the iteration"></canvas>
+        </div>
+
+        <div class="narr">
+          <div class="idx"><span>iter</span><span id="iterNum">0</span></div>
+          <div class="txt" id="narrTxt">Choose a method and press <b>Play</b>. The shaded band is the current bracket — the interval the root is known to sit inside.</div>
+        </div>
+
+        <div class="formula" id="formulaBox"></div>
+
+        <div class="tbl-wrap">
+          <table id="iterTable">
+            <thead><tr><th>n</th><th>a</th><th>b</th><th>c</th><th>f(c)</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <p class="dim" style="margin-top:16px; font-size:13.5px">What to watch for: in <b>Bisection</b> the bracket halves every time, so the answer improves at a fixed rate. In <b>False Position</b> the chord is drawn from the two endpoints and lands much closer to the root — but notice how one endpoint can stay stuck for every iteration. In <b>Newton–Raphson</b> there is no bracket at all; the tangent line's own x-intercept becomes the next guess, which is why it can jump straight onto the root in three or four steps.</p>
+  </section>
+
+  <!-- ================= CONVERGENCE ================= -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">02</span>
+      <h2>Why Newton wins — rate of convergence</h2>
+      <span class="sec-sub">error vs iteration, log scale</span>
+    </div>
+
+    <div class="conv-grid">
+      <div>
+        <div class="canvas-shell">
+          <canvas id="conv" height="320" aria-label="Convergence comparison chart"></canvas>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--teal)"></i>Bisection</span>
+          <span><i style="background:var(--rust)"></i>False Position</span>
+          <span><i style="background:var(--gold)"></i>Newton–Raphson</span>
+        </div>
+        <p class="dim" style="font-size:12.5px; margin-top:12px">The bisection line looks jagged rather than straight — that is not a plotting error. Its midpoint can land on either side of the root, so any single estimate may be worse than the one before it. What halves reliably is the <em>bracket width</em>, not the error of one estimate.</p>
+      </div>
+      <div>
+        <p>Each line is the true error <span class="mono">|x<sub>n</sub> − r|</span> after every iteration, plotted on a log scale for the equation selected above. A straight line means the error is being multiplied by a constant each step — <b>linear convergence</b>. A line that plunges steeply and then runs out of digits means the number of correct decimals is roughly doubling — <b>quadratic convergence</b>.</p>
+        <div class="formula" style="white-space:normal">
+          <span class="cap">rate of convergence of Newton's method</span>
+          if e<sub>n</sub> = x<sub>n</sub> − r, then &nbsp; e<sub>n+1</sub> ≈ ( f″(r) / 2f′(r) ) · e<sub>n</sub><sup>2</sup><br>
+          so &nbsp; |e<sub>n+1</sub>| ≤ ( M / 2m ) · e<sub>n</sub><sup>2</sup> &nbsp; where M = max|f″|, m = min|f′| on the interval
+        </div>
+        <div class="note"><b>Order, not speed.</b> Bisection has order 1 with rate ½ — you gain one binary digit per step, so about 3.3 steps per decimal place. Newton has order 2 — roughly double the correct decimals each step. False Position is normally order 1 and can be slower than it looks when one endpoint stagnates.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= METHOD CARDS ================= -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">03</span>
+      <h2>The three methods side by side</h2>
+      <span class="sec-sub">what to write in the exam</span>
+    </div>
+
+    <div class="cards">
+      <div class="card c1">
+        <span class="tag">Method 1</span>
+        <h3>Bisection</h3>
+        <p>Halve a sign-changing interval, keep the half that still changes sign. Needs nothing but continuity.</p>
+        <dl>
+          <dt>Formula</dt><dd class="mono">c = (a + b) / 2</dd>
+          <dt>Needs</dt><dd>f(a)·f(b) &lt; 0</dd>
+          <dt>Speed</dt><dd>slow, always works</dd>
+          <dt>Order</dt><dd>1 (rate ½)</dd>
+          <dt>Stopping</dt><dd>|b − a| &lt; ε</dd>
+        </dl>
+      </div>
+      <div class="card c2">
+        <span class="tag">Method 2</span>
+        <h3>False Position (Regula Falsi)</h3>
+        <p>Same bracket, but take the chord's x-intercept instead of the midpoint — uses the function values, so it usually lands nearer the root.</p>
+        <dl>
+          <dt>Formula</dt><dd class="mono">c = [a f(b) − b f(a)] / [f(b) − f(a)]</dd>
+          <dt>Needs</dt><dd>f(a)·f(b) &lt; 0</dd>
+          <dt>Speed</dt><dd>usually faster than bisection</dd>
+          <dt>Order</dt><dd>1, can stagnate</dd>
+          <dt>Stopping</dt><dd>|f(c)| &lt; ε</dd>
+        </dl>
+      </div>
+      <div class="card c3">
+        <span class="tag">Method 3</span>
+        <h3>Newton–Raphson</h3>
+        <p>Follow the tangent at the current guess down to the x-axis. No bracket needed, fastest of the three — if it converges.</p>
+        <dl>
+          <dt>Formula</dt><dd class="mono">x<sub>n+1</sub> = x<sub>n</sub> − f(x<sub>n</sub>)/f′(x<sub>n</sub>)</dd>
+          <dt>Needs</dt><dd>f′ ≠ 0, a good start</dd>
+          <dt>Speed</dt><dd>fastest</dd>
+          <dt>Order</dt><dd>2 (quadratic)</dd>
+          <dt>Stopping</dt><dd>|x<sub>n+1</sub> − x<sub>n</sub>| &lt; ε</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MISTAKES ================= -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">04</span>
+      <h2>Marks lost on this unit, every year</h2>
+      <span class="sec-sub">check before you close the paper</span>
+    </div>
+
+    <div class="check">
+      <li><span class="box"></span><div>Starting without checking the bracket. Always show <span class="mono">f(a)·f(b) &lt; 0</span> first.<small>without it, the whole answer is unsupported</small></div></li>
+      <li><span class="box"></span><div>Updating the wrong endpoint — replace the one whose sign <em>matches</em> f(c).<small>bisection and false position both</small></div></li>
+      <li><span class="box"></span><div>Swapping the numerator in the Regula Falsi formula: a pairs with f(b).<small>c = [a·f(b) − b·f(a)] / [f(b) − f(a)]</small></div></li>
+      <li><span class="box"></span><div>Using Newton without differentiating correctly, or starting where f′ ≈ 0.<small>f′(x) = 0 makes the next step undefined</small></div></li>
+      <li><span class="box"></span><div>Reporting more decimals than the iterations earned.<small>state the stopping condition you used</small></div></li>
+      <li><span class="box"></span><div>Writing only a table with no substitution. Show one full worked substitution per method.<small>that is where the method marks sit</small></div></li>
+    </div>
+  </section>
+
+  <footer>
+    Unit I of BCA-504 Numerical Methods · syllabus topics: Bisection, False Position, Newton–Raphson, rate of convergence.<br>
+    Units II–IV visual labs to follow · Unit IV covers Gauss Elimination only (Gauss–Seidel excluded on request).<br>
+    All iteration values on this page are computed live in the browser — check them against your own hand work.
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- equations ---------------- */
+  const EQ = {
+    A: {label:"f(x) = x³ − x − 2", f:x=>x*x*x - x - 2, df:x=>3*x*x - 1, a:1, b:2, x0:1.5, xMin:0.4, xMax:2.6},
+    B: {label:"f(x) = x³ − 2x − 5", f:x=>x*x*x - 2*x - 5, df:x=>3*x*x - 2, a:2, b:3, x0:2, xMin:1.4, xMax:3.4},
+    C: {label:"f(x) = x² − 4", f:x=>x*x - 4, df:x=>2*x, a:1, b:2.5, x0:3, xMin:0.5, xMax:3.5},
+    D: {label:"f(x) = cos x − x", f:x=>Math.cos(x) - x, df:x=>-Math.sin(x) - 1, a:0, b:1, x0:0.5, xMin:-0.3, xMax:1.5}
+  };
+
+  const COL = {
+    bisect:"#2aa6a6",
+    false:"#c2543f",
+    newton:"#d4a73a"
+  };
+  function isLight(){
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+  }
+  function palette(){
+    const light = isLight();
+    return {
+      grid: light ? "rgba(30,60,90,0.12)" : "rgba(120,160,190,0.13)",
+      axis: light ? "rgba(30,60,90,0.45)" : "rgba(150,185,210,0.45)",
+      curve: light ? "#16232e" : "#dbe6ef",
+      text: light ? "#4e6474" : "#8fa3b4",
+      faint: light ? "#7d8f9c" : "#61798b",
+      band: light ? "rgba(42,166,166,0.16)" : "rgba(42,166,166,0.18)",
+      bandEdge: light ? "rgba(15,118,118,0.5)" : "rgba(42,166,166,0.55)",
+      surface: light ? "#fbf9f5" : "#16232e"
+    };
+  }
+
+  /* ---------------- step generators ---------------- */
+  function bracketSteps(eq, method, n){
+    const f = eq.f;
+    let a = eq.a, b = eq.b;
+    const out = [];
+    for (let i = 1; i <= n; i++){
+      const fa = f(a), fb = f(b);
+      const c = (method === "bisect") ? (a + b) / 2 : (a * fb - b * fa) / (fb - fa);
+      const fc = f(c);
+      const leftHasRoot = fa * fc < 0;
+      out.push({i, a, b, c, fa, fb, fc, keep:"x"});
+      out[out.length - 1].keep = leftHasRoot ? "b" : "a";
+      if (fc === 0){ out[out.length - 1].exact = true; break; }   // landed exactly on the root
+      if (leftHasRoot) b = c; else a = c;
+    }
+    return out;
+  }
+  function newtonSteps(eq, n){
+    const f = eq.f, df = eq.df;
+    let x = eq.x0;
+    const out = [];
+    for (let i = 1; i <= n; i++){
+      const fx = f(x), d = df(x);
+      const x1 = x - fx / d;
+      out.push({i, x, fx, d, x1});
+      x = x1;
+    }
+    return out;
+  }
+
+  /* true root, by dense bisection */
+  function trueRoot(eq){
+    let a = eq.xMin, b = eq.xMax;
+    let fa = eq.f(a), fb = eq.f(b);
+    if (fa * fb > 0) return null;
+    for (let k = 0; k < 200; k++){
+      const c = (a + b) / 2, fc = eq.f(c);
+      if (fa * fc <= 0){ b = c; fb = fc; } else { a = c; fa = fc; }
+    }
+    return (a + b) / 2;
+  }
+
+  /* ---------------- state ---------------- */
+  const state = {
+    method:"bisect",
+    eqKey:"A",
+    steps:[],
+    cursor:0,        // number of steps applied (0 = nothing shown)
+    playing:false,
+    timer:null,
+    speed:720
+  };
+  const N_STEPS = 10;
+
+  const plotCv = document.getElementById("plot");
+  const convCv = document.getElementById("conv");
+  const narrTxt = document.getElementById("narrTxt");
+  const iterNum = document.getElementById("iterNum");
+  const formulaBox = document.getElementById("formulaBox");
+  const table = document.getElementById("iterTable");
+  const badge = document.getElementById("methodBadge");
+  const eqSel = document.getElementById("eqSel");
+  const playBtn = document.getElementById("playBtn");
+
+  /* populate equation select */
+  Object.keys(EQ).forEach(k=>{
+    const o = document.createElement("option");
+    o.value = k; o.textContent = EQ[k].label;
+    eqSel.appendChild(o);
+  });
+
+  /* ---------------- formatting ---------------- */
+  function num(v, dp){
+    if (v === undefined || v === null || !isFinite(v)) return "—";
+    let s = v.toFixed(dp === undefined ? 4 : dp);
+    if (s === "-0.0000") s = "0.0000";
+    return s;
+  }
+  function signed(v, dp){
+    const s = num(v, dp);
+    return (v > 0 && s[0] !== "−") ? "+" + s : s;
+  }
+  /* adaptive: tiny values get exponential notation so a rounded 0.0000 never lies about the sign */
+  function numA(v){
+    if (v === undefined || v === null || !isFinite(v)) return "—";
+    if (v !== 0 && Math.abs(v) < 5e-4) return v.toExponential(2);
+    return num(v, 4);
+  }
+  function signedA(v){
+    if (v === undefined || v === null || !isFinite(v)) return "—";
+    if (v !== 0 && Math.abs(v) < 5e-4) return (v > 0 ? "+" : "−") + Math.abs(v).toExponential(2);
+    return signed(v, 4);
+  }
+
+  /* ---------------- formulas per method ---------------- */
+  const FORMULAS = {
+    bisect:{title:"bisection step", html:'<span class="cap">midpoint of the bracket</span>c = ( a + b ) / 2 &nbsp;&nbsp;·&nbsp;&nbsp; keep the half where the sign still changes'},
+    false:{title:"false position step", html:'<span class="cap">x-intercept of the chord through (a, f(a)) and (b, f(b))</span>c = [ a·f(b) − b·f(a) ] / [ f(b) − f(a) ] &nbsp;=&nbsp; b − f(b)·(b − a) / [ f(b) − f(a) ]'},
+    newton:{title:"newton–raphson step", html:'<span class="cap">slide down the tangent to the x-axis</span>x<sub>n+1</sub> = x<sub>n</sub> − f(x<sub>n</sub>) / f′(x<sub>n</sub>)'}
+  };
+
+  /* ---------------- canvas helpers ---------------- */
+  function fitCanvas(cv){
+    const dpr = window.devicePixelRatio || 1;
+    const rect = cv.getBoundingClientRect();
+    const w = Math.max(rect.width, 280);
+    const h = parseInt(cv.getAttribute("height"), 10) || 400;
+    cv.width = Math.round(w * dpr);
+    cv.height = Math.round(h * dpr);
+    cv.style.height = h + "px";
+    const ctx = cv.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return {ctx, w, h};
+  }
+
+  /* ---------------- main plot ---------------- */
+  function drawPlot(){
+    const eq = EQ[state.eqKey];
+    const {ctx, w, h} = fitCanvas(plotCv);
+    const P = palette();
+    const pad = {l:52, r:22, t:26, b:38};
+    const pw = w - pad.l - pad.r;
+    const ph = h - pad.t - pad.b;
+
+    ctx.clearRect(0, 0, w, h);
+
+    const xMin = eq.xMin, xMax = eq.xMax;
+    // y range from samples
+    let yMin = Infinity, yMax = -Infinity;
+    for (let k = 0; k <= 240; k++){
+      const x = xMin + (xMax - xMin) * k / 240;
+      const y = eq.f(x);
+      if (isFinite(y)){ if (y < yMin) yMin = y; if (y > yMax) yMax = y; }
+    }
+    if (!isFinite(yMin)){ yMin = -1; yMax = 1; }
+    const span = (yMax - yMin) || 1;
+    yMin -= span * 0.12; yMax += span * 0.12;
+
+    // focus the view on the axis region so the root stays readable
+    let cap = 0;
+    [eq.a, eq.b, eq.x0].forEach(v=>{
+      const y = Math.abs(eq.f(v));
+      if (isFinite(y) && y > cap) cap = y;
+    });
+    cap = Math.max(cap * 2.1, 0.6);
+    if (yMin < -cap) yMin = -cap;
+    if (yMax > cap) yMax = cap;
+    if (yMin > 0) yMin = -cap * 0.35;
+    if (yMax < 0) yMax = cap * 0.35;
+
+    const X = x => pad.l + (x - xMin) / (xMax - xMin) * pw;
+    const Y = y => pad.t + (yMax - y) / (yMax - yMin) * ph;
+
+    // plot frame
+    ctx.fillStyle = P.surface;
+    ctx.fillRect(pad.l, pad.t, pw, ph);
+
+    // grid
+    ctx.strokeStyle = P.grid; ctx.lineWidth = 1;
+    const gx = niceStep(xMax - xMin), gy = niceStep(yMax - yMin);
+    for (let x = Math.ceil(xMin / gx) * gx; x <= xMax; x += gx){
+      const px = Math.round(X(x)) + .5;
+      ctx.beginPath(); ctx.moveTo(px, pad.t); ctx.lineTo(px, pad.t + ph); ctx.stroke();
+    }
+    for (let y = Math.ceil(yMin / gy) * gy; y <= yMax; y += gy){
+      const py = Math.round(Y(y)) + .5;
+      ctx.beginPath(); ctx.moveTo(pad.l, py); ctx.lineTo(pad.l + pw, py); ctx.stroke();
+    }
+
+    // axes
+    ctx.strokeStyle = P.axis; ctx.lineWidth = 1.2;
+    if (yMin < 0 && yMax > 0){
+      const py = Math.round(Y(0)) + .5;
+      ctx.beginPath(); ctx.moveTo(pad.l, py); ctx.lineTo(pad.l + pw, py); ctx.stroke();
+    }
+    if (xMin < 0 && xMax > 0){
+      const px = Math.round(X(0)) + .5;
+      ctx.beginPath(); ctx.moveTo(px, pad.t); ctx.lineTo(px, pad.t + ph); ctx.stroke();
+    }
+
+    // tick labels
+    ctx.fillStyle = P.faint;
+    ctx.font = "10px 'IBM Plex Mono', monospace";
+    ctx.textAlign = "center"; ctx.textBaseline = "top";
+    for (let x = Math.ceil(xMin / gx) * gx; x <= xMax; x += gx){
+      ctx.fillText(fmtTick(x), X(x), pad.t + ph + 8);
+    }
+    ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    for (let y = Math.ceil(yMin / gy) * gy; y <= yMax; y += gy){
+      ctx.fillText(fmtTick(y), pad.l - 8, Y(y));
+    }
+
+    // axis titles
+    ctx.fillStyle = P.text;
+    ctx.font = "11px 'IBM Plex Mono', monospace";
+    ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+    ctx.fillText("x", pad.l + pw - 4, pad.t + ph - 6);
+
+    // clip for plot contents
+    ctx.save();
+    ctx.beginPath(); ctx.rect(pad.l, pad.t, pw, ph); ctx.clip();
+
+    const cur = state.cursor > 0 ? state.steps[state.cursor - 1] : null;
+
+    // bracket band + chord
+    if (cur && state.method !== "newton"){
+      ctx.fillStyle = P.band;
+      ctx.fillRect(X(cur.a), pad.t, Math.max(1, X(cur.b) - X(cur.a)), ph);
+      ctx.strokeStyle = P.bandEdge;
+      ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+      [cur.a, cur.b].forEach(v=>{
+        ctx.beginPath(); ctx.moveTo(X(v), pad.t); ctx.lineTo(X(v), pad.t + ph); ctx.stroke();
+      });
+      ctx.setLineDash([]);
+
+      if (state.method === "false"){
+        ctx.strokeStyle = COL.false; ctx.lineWidth = 1.6; ctx.setLineDash([5, 4]);
+        ctx.beginPath();
+        ctx.moveTo(X(cur.a), Y(cur.fa));
+        ctx.lineTo(X(cur.b), Y(cur.fb));
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+
+    // tangent for newton
+    if (cur && state.method === "newton"){
+      const slope = cur.d;
+      ctx.strokeStyle = COL.newton; ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]);
+      ctx.beginPath();
+      ctx.moveTo(X(xMin), Y(cur.fx + slope * (xMin - cur.x)));
+      ctx.lineTo(X(xMax), Y(cur.fx + slope * (xMax - cur.x)));
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // curve
+    ctx.strokeStyle = P.curve; ctx.lineWidth = 2;
+    ctx.beginPath();
+    let started = false;
+    for (let k = 0; k <= 480; k++){
+      const x = xMin + (xMax - xMin) * k / 480;
+      const y = eq.f(x);
+      if (!isFinite(y)){ started = false; continue; }
+      const px = X(x), py = Y(y);
+      if (!started){ ctx.moveTo(px, py); started = true; } else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+
+    ctx.restore();
+
+    // markers (outside clip so labels stay readable)
+    const mColor = COL[state.method];
+    if (cur && state.method !== "newton"){
+      // endpoints
+      marker(ctx, X(cur.a), Y(cur.fa), P, mColor, false);
+      marker(ctx, X(cur.b), Y(cur.fb), P, mColor, false);
+      // estimate c
+      ctx.strokeStyle = mColor; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(X(cur.c), pad.t); ctx.lineTo(X(cur.c), pad.t + ph); ctx.stroke();
+      marker(ctx, X(cur.c), Y(0), P, mColor, true);
+      label(ctx, "c", X(cur.c), pad.t - 8, mColor, "center");
+    }
+    if (cur && state.method === "newton"){
+      marker(ctx, X(cur.x), Y(cur.fx), P, mColor, true);
+      label(ctx, "x" + cur.i, X(cur.x), Y(cur.fx) - 12, mColor, "center");
+      ctx.strokeStyle = mColor; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(X(cur.x1), pad.t); ctx.lineTo(X(cur.x1), pad.t + ph); ctx.stroke();
+      marker(ctx, X(cur.x1), Y(0), P, mColor, true);
+      label(ctx, "x" + (cur.i + 1), X(cur.x1), pad.t - 8, mColor, "center");
+    }
+
+    // legend for band
+    if (cur && state.method !== "newton"){
+      ctx.fillStyle = P.text;
+      ctx.font = "11px 'IBM Plex Mono', monospace";
+      ctx.textAlign = "right"; ctx.textBaseline = "top";
+      ctx.fillText("bracket: [" + num(cur.a, 3) + ", " + num(cur.b, 3) + "]", pad.l + pw - 8, pad.t + 8);
+    }
+  }
+
+  function marker(ctx, px, py, P, color, filled){
+    ctx.beginPath();
+    ctx.arc(px, py, filled ? 4.4 : 3.4, 0, Math.PI * 2);
+    ctx.fillStyle = filled ? color : P.surface;
+    ctx.fill();
+    ctx.lineWidth = 1.6; ctx.strokeStyle = color; ctx.stroke();
+  }
+  function label(ctx, txt, px, py, color, align){
+    ctx.fillStyle = color;
+    ctx.font = "600 11px 'IBM Plex Mono', monospace";
+    ctx.textAlign = align || "center"; ctx.textBaseline = "bottom";
+    ctx.fillText(txt, px, py);
+  }
+  function niceStep(range){
+    const raw = range / 6;
+    const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    const n = raw / mag;
+    let s;
+    if (n < 1.5) s = 1; else if (n < 3) s = 2; else if (n < 7) s = 5; else s = 10;
+    return s * mag;
+  }
+  function fmtTick(v){
+    if (Math.abs(v) < 1e-9) return "0";
+    const a = Math.abs(v);
+    if (a >= 1000 || a < 0.01) return v.toExponential(0).replace("e", "e");
+    return String(parseFloat(v.toFixed(2)));
+  }
+
+  /* ---------------- convergence chart ---------------- */
+  function drawConvergence(){
+    const eq = EQ[state.eqKey];
+    const {ctx, w, h} = fitCanvas(convCv);
+    const P = palette();
+    const pad = {l:54, r:16, t:18, b:34};
+    const pw = w - pad.l - pad.r;
+    const ph = h - pad.t - pad.b;
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = P.surface;
+    ctx.fillRect(pad.l, pad.t, pw, ph);
+
+    const N = 10;
+    const top = 1;            // 10^0
+    const bottom = 1e-12;     // 10^-12
+    const lgTop = Math.log10(top), lgBot = Math.log10(bottom);
+
+    const X = i => pad.l + (i - 1) / (N - 1) * pw;
+    const Y = e => {
+      const v = Math.min(Math.max(e, bottom), top);
+      return pad.t + (lgTop - Math.log10(v)) / (lgTop - lgBot) * ph;
+    };
+
+    // decade grid
+    ctx.strokeStyle = P.grid; ctx.lineWidth = 1;
+    ctx.fillStyle = P.faint;
+    ctx.font = "9.5px 'IBM Plex Mono', monospace";
+    ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    for (let d = 0; d >= -12; d -= 2){
+      const py = Math.round(Y(Math.pow(10, d))) + .5;
+      ctx.beginPath(); ctx.moveTo(pad.l, py); ctx.lineTo(pad.l + pw, py); ctx.stroke();
+      ctx.fillText("1e" + d, pad.l - 8, py);
+    }
+    // x ticks
+    ctx.textAlign = "center"; ctx.textBaseline = "top";
+    for (let i = 1; i <= N; i += (N > 6 ? 3 : 1)){
+      ctx.fillText(String(i), X(i), pad.t + ph + 7);
+    }
+    ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+    ctx.fillStyle = P.text;
+    ctx.font = "10px 'IBM Plex Mono', monospace";
+    ctx.fillText("iteration n", pad.l + pw / 2, h - 4);
+
+    const root = trueRoot(eq);
+    if (root === null) return;
+
+    // series
+    const series = [];
+    const bs = bracketSteps(eq, "bisect", N);
+    series.push({name:"bisect", color:COL.bisect, pts:bs.map(s=>Math.abs(s.c - root))});
+    const fs = bracketSteps(eq, "false", N);
+    series.push({name:"false", color:COL.false, pts:fs.map(s=>Math.abs(s.c - root))});
+    const ns = newtonSteps(eq, N);
+    series.push({name:"newton", color:COL.newton, pts:ns.map(s=>Math.abs(s.x1 - root))});
+
+    ctx.save();
+    ctx.beginPath(); ctx.rect(pad.l, pad.t, pw, ph); ctx.clip();
+    series.forEach(s=>{
+      ctx.strokeStyle = s.color; ctx.lineWidth = 2;
+      ctx.beginPath();
+      s.pts.forEach((e, k)=>{
+        const px = X(k + 1), py = Y(e < 1e-13 ? 1e-13 : e);
+        if (k === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      });
+      ctx.stroke();
+      s.pts.forEach((e, k)=>{
+        ctx.beginPath();
+        ctx.arc(X(k + 1), Y(e < 1e-13 ? 1e-13 : e), 2.6, 0, Math.PI * 2);
+        ctx.fillStyle = s.color; ctx.fill();
+      });
+    });
+    ctx.restore();
+  }
+
+  /* ---------------- narrative ---------------- */
+  function narrativeFor(step, method){
+    if (!step) return null;
+    if (method === "newton"){
+      return {
+        idx: step.i,
+        html: 'At <code>x<sub>' + step.i + '</sub> = ' + numA(step.x) + '</code> we have <code>f = ' + signedA(step.fx) +
+              '</code> and <code>f′ = ' + num(step.d) + '</code>. Slide down the tangent: <code>x<sub>' + (step.i + 1) +
+              '</sub> = ' + numA(step.x) + ' − (' + signedA(step.fx) + ')/( ' + num(step.d) + ' ) = <b>' + numA(step.x1) + '</b></code>.'
+      };
+    }
+    const methodName = method === "bisect" ? "the midpoint" : "the chord";
+    const signWord = step.fc < 0 ? "negative" : "positive";
+    const keepTxt = step.exact
+      ? "<b>f(c) = 0 exactly</b> — this <code>c</code> <em>is</em> the root, so the method stops here"
+      : step.keep === "b"
+      ? "f(c) has the <b>opposite</b> sign to f(a), so the root is in [a, c] — move <code>b</code> to " + num(step.c)
+      : "f(c) has the <b>same</b> sign as f(a), so the root is in [c, b] — move <code>a</code> to " + num(step.c);
+    return {
+      idx: step.i,
+      html: 'Bracket [' + num(step.a) + ', ' + num(step.b) + ']. Take ' + methodName + ' → <code>c = <b>' + numA(step.c) +
+            '</b></code>. Then <code>f(c) = ' + signedA(step.fc) + '</code> (' + signWord + '). ' + keepTxt + '.</code>'
+    };
+  }
+
+  /* ---------------- table ---------------- */
+  function renderTable(){
+    const head = table.querySelector("thead tr");
+    const body = table.querySelector("tbody");
+    const eq = EQ[state.eqKey];
+    if (state.method === "newton"){
+      head.innerHTML = "<th>n</th><th>x<sub>n</sub></th><th>f(x<sub>n</sub>)</th><th>f′(x<sub>n</sub>)</th><th>x<sub>n+1</sub></th>";
+    } else {
+      head.innerHTML = "<th>n</th><th>a</th><th>b</th><th>c</th><th>f(c)</th>";
+    }
+    body.innerHTML = "";
+    for (let k = 0; k < state.cursor; k++){
+      const s = state.steps[k];
+      const tr = document.createElement("tr");
+      if (k === state.cursor - 1) tr.className = "cur";
+      if (state.method === "newton"){
+        tr.innerHTML = "<td>" + s.i + "</td><td>" + numA(s.x) + "</td><td class='" + (s.fx < 0 ? "neg" : "pos") + "'>" +
+          signedA(s.fx) + "</td><td>" + num(s.d) + "</td><td>" + numA(s.x1) + "</td>";
+      } else {
+        tr.innerHTML = "<td>" + s.i + "</td><td>" + num(s.a) + "</td><td>" + num(s.b) + "</td><td><b>" +
+          numA(s.c) + "</b></td><td class='" + (s.fc < 0 ? "neg" : "pos") + "'>" + signedA(s.fc) + "</td>";
+      }
+      body.appendChild(tr);
+    }
+  }
+
+  /* ---------------- render ---------------- */
+  function render(){
+    const cur = state.cursor > 0 ? state.steps[state.cursor - 1] : null;
+    iterNum.textContent = state.cursor;
+    badge.textContent = state.method === "false" ? "false position" : state.method === "newton" ? "newton–raphson" : "bisection";
+    badge.style.color = COL[state.method];
+    badge.style.borderColor = COL[state.method];
+    formulaBox.innerHTML = FORMULAS[state.method].html;
+
+    const n = narrativeFor(cur, state.method);
+    if (n){
+      narrTxt.innerHTML = n.html;
+    } else {
+      narrTxt.innerHTML = state.method === "newton"
+        ? "Newton–Raphson starts from a single guess <code>x₀ = " + num(EQ[state.eqKey].x0) + "</code>. There is no bracket to shade — the tangent does the work."
+        : "The shaded band is the current bracket — the interval the root is known to sit inside. Press <b>Play</b> to start trapping it.";
+    }
+    renderTable();
+    drawPlot();
+    drawConvergence();
+    playBtn.textContent = state.playing ? "Pause" : "Play";
+  }
+
+  /* ---------------- controls ---------------- */
+  function rebuild(){
+    const eq = EQ[state.eqKey];
+    state.steps = state.method === "newton" ? newtonSteps(eq, N_STEPS) : bracketSteps(eq, state.method, N_STEPS);
+    state.cursor = 0;
+    stop();
+    render();
+  }
+  function advance(){
+    if (state.cursor >= state.steps.length){ stop(); return; }
+    state.cursor++;
+    render();
+    if (state.cursor >= state.steps.length) stop();
+  }
+  function start(){
+    if (state.cursor >= state.steps.length) state.cursor = 0;
+    state.playing = true;
+    playBtn.textContent = "Pause";
+    tick();
+  }
+  function tick(){
+    clearTimeout(state.timer);
+    if (!state.playing) return;
+    state.timer = setTimeout(function(){
+      if (!state.playing) return;
+      if (state.cursor >= state.steps.length){ stop(); render(); return; }
+      state.cursor++; render();
+      if (state.cursor >= state.steps.length){ stop(); render(); return; }
+      tick();
+    }, state.speed);
+  }
+  function stop(){
+    state.playing = false;
+    clearTimeout(state.timer);
+    playBtn.textContent = "Play";
+  }
+
+  playBtn.addEventListener("click", ()=>{ state.playing ? (stop(), render()) : start(); });
+  document.getElementById("stepBtn").addEventListener("click", ()=>{ stop(); advance(); });
+  document.getElementById("resetBtn").addEventListener("click", ()=>{ stop(); state.cursor = 0; render(); });
+  document.getElementById("allBtn").addEventListener("click", ()=>{ stop(); state.cursor = state.steps.length; render(); });
+  document.getElementById("spd").addEventListener("input", e=>{
+    state.speed = parseInt(e.target.value, 10);
+  });
+
+  document.querySelectorAll(".seg button").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      document.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed", "false"));
+      b.setAttribute("aria-pressed", "true");
+      state.method = b.getAttribute("data-method");
+      rebuild();
+    });
+  });
+  eqSel.addEventListener("change", ()=>{ state.eqKey = eqSel.value; rebuild(); });
+
+  let rt;
+  window.addEventListener("resize", ()=>{
+    clearTimeout(rt);
+    rt = setTimeout(()=>{ drawPlot(); drawConvergence(); }, 140);
+  });
+  const mq = window.matchMedia("(prefers-color-scheme: light)");
+  if (mq.addEventListener) mq.addEventListener("change", ()=>{ drawPlot(); drawConvergence(); });
+
+  rebuild();
+})();
+</script>
+</body>
+</html>
